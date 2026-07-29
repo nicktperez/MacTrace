@@ -1,0 +1,28 @@
+[mactrace]
+mode = "live"
+database_path = "data/mactrace.db"
+poll_interval = 2.0
+network_poll_interval = 4.0
+retention_days = 30
+retention_check_interval_hours = 6
+max_database_mb = 256
+command_line_max_chars = 320
+signing_inspection_workers = 2
+signing_inspection_queue_size = 256
+assessment_window_hours = 24
+baseline_learning_observations = 100
+
+# Metadata only. Contents are never read.
+watch_paths = [
+  "~/Library/LaunchAgents",
+  "~/.ssh",
+  "~/Downloads",
+]
+
+# Detection tuning. Keep config.local.toml private and Git-ignored.
+suppressed_rule_ids = []
+allowlisted_executable_prefixes = [
+  # "/Applications/TrustedInternalTool.app/",
+]
+allowlisted_process_names = []
+allowlisted_remote_addresses = []

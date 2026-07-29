@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="MacTrace local endpoint activity monitor">
+    <title>MacTrace · Endpoint visibility</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to workspace</a>
+    <div class="shell">
+      <aside class="rail">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div><strong>MacTrace</strong><small>Endpoint visibility</small></div>
+        </div>
+        <nav class="nav" aria-label="Primary navigation">
+          <button class="nav-item active" data-view="overview"><span>⌁</span> Overview</button>
+          <button class="nav-item" data-view="events"><span>≋</span> Live events <b id="event-badge">0</b></button>
+          <button class="nav-item" data-view="processes"><span>⑂</span> Processes</button>
+          <button class="nav-item" data-view="network"><span>⇄</span> Network</button>
+          <button class="nav-item" data-view="detections"><span>◇</span> Detections <b id="alert-badge">0</b></button>
+          <button class="nav-item" data-view="cases"><span>▣</span> Cases</button>
+          <button class="nav-item" data-view="inventory"><span>⌘</span> Inventory</button>
+          <button class="nav-item" data-view="investigation"><span>⌕</span> Investigation</button>
+          <button class="nav-item" data-view="health"><span>⚙</span> Health & settings</button>
+        </nav>
+        <div class="privacy-note">
+          <span class="privacy-dot"></span>
+          <div><strong>Local-only</strong><small>No telemetry leaves this Mac</small></div>
+        </div>
+      </aside>
+
+      <main id="workspace" class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="context-label" id="page-context">Security overview</p>
+            <h1 id="page-title">Endpoint posture</h1>
+          </div>
+          <div class="top-actions">
+            <span id="mode-pill" class="mode-pill">Checking mode…</span>
+            <span id="socket-state" class="socket-state offline"><i></i> Connecting</span>
+          </div>
+        </header>
+
+        <div id="demo-banner" class="demo-banner hidden" role="status">
+          <span>SIMULATION</span>
+          <p>This workspace is replaying sanitized synthetic activity. No event shown here came from your Mac.</p>
+        </div>
+
+        <section id="view-overview" class="view active" aria-labelledby="page-title">
+          <div class="posture">
+            <div class="risk-block">
+              <div class="risk-dial" id="risk-dial"><span id="risk-score">0</span><small>/ 100</small></div>
+              <div>
+                <p>Current risk score</p>
+                <h2 id="risk-label">Minimal observed risk</h2>
+                <span>Weighted from explainable, unresolved detections</span>
+              </div>
+            </div>
+            <div class="metric-strip">
+              <article><span>Alerts today</span><strong id="metric-alerts">0</strong><small>Requires review</small></article>
+              <article><span>Observed processes</span><strong id="metric-processes">0</strong><small>Last 24 hours</small></article>
+              <article><span>Network observations</span><strong id="metric-network">0</strong><small>Last 10 minutes</small></article>
+              <article><span>Stored events</span><strong id="metric-events">0</strong><small>Local database</small></article>
+            </div>
+          </div>
+          <section id="assessment-brief" class="assessment-brief loading" aria-live="polite">
+            <div class="assessment-lead">
+              <span class="assessment-mark">⌁</span>
+              <div>
+                <div class="assessment-heading"><span>Activity assessment</span><span class="assessment-method">Local correlation</span></div>
+                <h2>Analyzing related detections…</h2>
+                <p>Connecting process ancestry, persistence, trust, command, and network signals.</p>
+              </div>
+            </div>
+            <div class="assessment-findings"><span class="assessment-skeleton"></span><span class="assessment-skeleton short"></span></div>
+          </section>
+          <div class="overview-grid">
+            <article class="panel chart-panel">
+              <div class="panel-head"><div><h2>Event volume</h2><p>Recent activity by type</p></div><span class="range-label">SESSION</span></div>
+              <div class="chart-wrap"><canvas id="events-chart"></canvas></div>
+            </article>
+            <article class="panel severity-panel">
+              <div class="panel-head"><div><h2>Severity</h2><p>All detected alerts</p></div></div>
+              <div class="severity-visual">
+                <div class="donut-wrap"><canvas id="severity-chart"></canvas><span id="severity-total">0<small>alerts</small></span></div>
+                <div id="severity-legend" class="severity-legend"></div>
+              </div>
+            </article>
+          </div>
+          <article class="panel recent-panel">
+            <div class="panel-head"><div><h2>Recent detections</h2><p>Behaviors that may warrant investigation</p></div><button class="text-button" data-go="detections">View all →</button></div>
+            <div id="recent-alerts" class="alert-list"></div>
+          </article>
+        </section>
+
+        <section id="view-events" class="view">
+          <div class="toolbar">
+            <label class="search"><span>⌕</span><input id="event-search" type="search" placeholder="Search process, path, address…" aria-label="Search events"></label>
+            <select id="event-type-filter" aria-label="Filter by event type"><option value="">All event types</option><option value="process_start">Process start</option><option value="process_stop">Process stop</option><option value="network_connection">Connection</option><option value="network_listen">Listener</option><option value="file_change">File change</option></select>
+            <button id="pause-stream" class="secondary-button">Ⅱ Pause</button>
+          </div>
+          <div class="stream-meta"><span><i class="live-pulse"></i> Live stream</span><span id="visible-events">0 events</span></div>
+          <div id="event-stream" class="event-stream"></div>
+        </section>
+
+        <section id="view-processes" class="view split-view">
+          <article class="panel list-pane">
+            <div class="panel-head"><div><h2>Process ancestry</h2><p>Select a process for context</p></div></div>
+            <div id="process-tree" class="process-tree"></div>
+          </article>
+          <article id="process-detail" class="panel detail-pane empty-state">
+            <div class="empty-glyph">⑂</div><h2>Select a process</h2><p>Review its ancestry, metadata, connections, and associated alerts.</p>
+          </article>
+        </section>
+
+        <section id="view-network" class="view">
+          <div class="toolbar">
+            <label class="search"><span>⌕</span><input id="network-search" type="search" placeholder="Search process or address…" aria-label="Search network activity"></label>
+            <span class="toolbar-note">Metadata only · payloads are never inspected</span>
+          </div>
+          <article class="panel table-panel">
+            <div class="data-table" id="network-table"></div>
+          </article>
+        </section>
+
+        <section id="view-detections" class="view split-view detection-layout">
+          <article class="panel list-pane">
+            <div class="panel-head"><div><h2>Detection queue</h2><p>Explainable signals, not verdicts</p></div></div>
+            <div class="filter-row">
+              <select id="severity-filter" aria-label="Filter severity"><option value="">All severities</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select>
+              <select id="status-filter" aria-label="Filter status"><option value="">All statuses</option><option>new</option><option>investigating</option><option>benign</option><option>resolved</option></select>
+            </div>
+            <div id="detection-list" class="detection-list"></div>
+          </article>
+          <article id="detection-detail" class="panel detail-pane empty-state">
+            <div class="empty-glyph">◇</div><h2>Select a detection</h2><p>See the explanation, evidence, and recommended investigation steps.</p>
+          </article>
+        </section>
+
+        <section id="view-investigation" class="view">
+          <article id="investigation-content" class="panel investigation empty-state">
+            <div class="empty-glyph">⌕</div><h2>No investigation selected</h2><p>Open a detection and choose “Build timeline” to correlate its evidence.</p>
+          </article>
+        </section>
+
+        <section id="view-cases" class="view split-view">
+          <article class="panel list-pane">
+            <div class="panel-head"><div><h2>Correlated cases</h2><p>Related signals grouped into reviewable work</p></div></div>
+            <div id="case-list" class="case-list"></div>
+          </article>
+          <article id="case-detail" class="panel detail-pane empty-state">
+            <div class="empty-glyph">▣</div><h2>Select a case</h2><p>Review its summary, detections, evidence timeline, and analyst disposition.</p>
+          </article>
+        </section>
+
+        <section id="view-inventory" class="view">
+          <div class="toolbar">
+            <label class="search"><span>⌕</span><input id="inventory-search" type="search" placeholder="Search path, process, or trust…" aria-label="Search inventory"></label>
+            <select id="inventory-kind" aria-label="Inventory type"><option value="executables">Executables</option><option value="persistence">Persistence</option></select>
+            <span class="toolbar-note">Observed metadata · local only</span>
+          </div>
+          <article class="panel table-panel">
+            <div class="inventory-summary" id="inventory-summary"></div>
+            <div class="data-table inventory-table" id="inventory-table"></div>
+          </article>
+        </section>
+
+        <section id="view-health" class="view">
+          <div id="sensor-grid" class="sensor-grid"></div>
+          <div class="settings-grid">
+            <article class="panel">
+              <div class="panel-head"><div><h2>Behavioral baseline</h2><p>Local history used to highlight first-seen activity</p></div></div>
+              <div id="baseline-panel" class="baseline-panel"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head"><div><h2>Allowlist</h2><p>Scoped exceptions applied before alert creation</p></div></div>
+              <form id="allowlist-form" class="allowlist-form">
+                <select id="allowlist-kind"><option value="process_name">Process name</option><option value="executable_prefix">Executable prefix</option><option value="remote_cidr">Remote IP / CIDR</option></select>
+                <input id="allowlist-value" required maxlength="500" placeholder="Value to allow">
+                <select id="allowlist-rule"><option value="">All rules</option></select>
+                <button class="primary-button" type="submit">Add exception</button>
+              </form>
+              <div id="allowlist-list" class="allowlist-list"></div>
+            </article>
+          </div>
+          <article class="panel rule-panel">
+            <div class="panel-head"><div><h2>Detection rules</h2><p>Enable rules and adjust severity without editing configuration files</p></div></div>
+            <div id="rules-list" class="rules-list"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+    <div id="toast-region" class="toast-region" aria-live="polite"></div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

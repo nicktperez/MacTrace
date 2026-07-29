@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="780" viewBox="0 0 1400 780" role="img" aria-labelledby="title desc">
+  <title id="title">MacTrace dashboard placeholder</title>
+  <desc id="desc">A dark placeholder showing the MacTrace dashboard structure.</desc>
+  <rect width="1400" height="780" fill="#111"/>
+  <rect x="0" y="0" width="220" height="780" fill="#171717"/>
+  <text x="32" y="48" fill="#f2f2f2" font-family="system-ui" font-size="20" font-weight="700">MacTrace</text>
+  <text x="260" y="56" fill="#f2f2f2" font-family="system-ui" font-size="24" font-weight="700">Endpoint posture</text>
+  <rect x="260" y="100" width="1090" height="140" rx="12" fill="#1b1b1b"/>
+  <rect x="260" y="265" width="700" height="250" rx="12" fill="#1b1b1b"/>
+  <rect x="980" y="265" width="370" height="250" rx="12" fill="#1b1b1b"/>
+  <rect x="260" y="540" width="1090" height="190" rx="12" fill="#1b1b1b"/>
+  <circle cx="335" cy="170" r="45" fill="none" stroke="#c73a50" stroke-width="8"/>
+  <path d="M300 450 L390 390 L470 420 L560 335 L650 370 L760 315 L880 350" fill="none" stroke="#4fc7d8" stroke-width="3"/>
+  <text x="700" y="680" fill="#777" font-family="system-ui" font-size="18" text-anchor="middle">Run demo mode and open localhost:8000 for the live interface</text>
+</svg>
