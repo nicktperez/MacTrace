@@ -1,5 +1,7 @@
 # MacTrace
 
+[![CI](https://github.com/nicktperez/MacTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/nicktperez/MacTrace/actions/workflows/ci.yml)
+
 MacTrace is a local-first macOS endpoint activity monitor and investigation dashboard. It
 collects security-relevant **metadata** from a Mac you control, evaluates that activity with
 plain-language rules, and presents evidence through a responsive dashboard at
@@ -248,4 +250,4 @@ src/mactrace/
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
